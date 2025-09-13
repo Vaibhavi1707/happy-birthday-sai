@@ -1,13 +1,555 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday Saiiii!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Press Start 2P', cursive;
+      background: linear-gradient(135deg, #FFD6EC 0%, #FFC5D3 60%, #FFF1FB 100%);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; user-select: none;
+      background-size: 12px 12px, 12px 12px, 24px 24px, 24px 24px;
+      background-image:
+        linear-gradient(90deg, rgba(255,170,210,0.2) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,170,210,0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,140,180,0.5) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,140,180,0.5) 1px, transparent 1px);
+      transition: filter 0.3s ease;
+    }
+    #app-container {
+      position: relative; width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden; padding: 1rem; box-sizing: border-box;
+    }
+    #app-container.blur {
+      filter: blur(7px) brightness(0.8);
+      pointer-events: none;
+      user-select: none;
+    }
+    #cake-screen {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; padding-top: 20px;
+      background: transparent; z-index: 20;
+      animation: fadeInDown 1.2s ease forwards;
+    }
+    .cake-holder {
+      position: relative; width: 380px; height: 420px;
+      display: flex; align-items: flex-end; justify-content: center;
+      animation: cakeDrop 1.2s cubic-bezier(.22,.61,.36,1) 0s;
+    }
+    .pixel-cake {
+      position: relative; width: 280px; height: 160px;
+      background: #fff; border: 8px solid #000; border-radius: 50% / 28%;
+      margin-bottom: 35px;
+      box-shadow: 10px 18px 0 #fcc, 0 40px 0 #fff3fa;
+      z-index: 2; image-rendering: pixelated;
+      display: flex; align-items: flex-start; justify-content: center;
+    }
+    .cake-shadow {
+      position: absolute; bottom: 16px; left: 50%;
+      width: 140px; height: 38px;
+      background: #eec9d4;
+      border-radius: 92px 98px 88px 110px / 44px 38px 26px 22px;
+      filter: blur(1.7px); opacity: 0.46; z-index: 1;
+      transform: translateX(-50%);
+    }
+    .strawberries {
+      position: absolute; width: 100%; height: 60px; top: 18px; left: 0; z-index: 10;
+      pointer-events: none;
+    }
+    .strawberry {
+      position: absolute; width: 32px; height: 36px;
+      border-radius: 48% 48% 58% 58% / 68% 68% 88% 88%;
+      background: #d9335c; border: 5px solid #900; box-shadow: 2px 6px 0 #a61937;
+    }
+    .strawberry.s1 { left: 8px;  top: 10px; }
+    .strawberry.s2 { left: 42px; top: 0px; }
+    .strawberry.s3 { left: 96px; top: -5px;}
+    .strawberry.s4 { left: 156px; top: 0px; }
+    .strawberry.s5 { left: 208px; top: 10px; }
+    .strawberry.s6 { left: 244px; top: 30px;}
+    .strawberry.s7 { left: 196px; top: 38px;}
+    .strawberry.s8 { left: 68px;  top: 38px;}
+    .cake-rim {
+      position: absolute; top: 32px; left: 24px;
+      width: 232px; height: 18px;
+      background: #fff;
+      border-radius: 52% 52% 38% 38% / 100% 100% 100% 100%;
+      border: 4px solid #000;
+      border-bottom: 8px solid #ffe4ef;
+      box-shadow: 0 9px #ffe4ef;
+      z-index: 11;
+    }
+    .candles {
+      position: absolute; top: -30px; left: calc(40% + 25px);
+      width: 60%; height: 80px;
+      display: flex; align-items: flex-end; justify-content: space-evenly;
+      z-index: 20;
+      animation: flickerLight 2.2s ease-in-out infinite alternate;
+    }
+    .pixel-candle {
+      position: relative;
+      width: 36px; height: 72px;
+      background: #fff;
+      border: 6px solid #000;
+      border-radius: 13px 13px 7px 7px / 12px 12px 12px 12px;
+      box-shadow: inset 0 18px #ffe8e8;
+      cursor: pointer;
+      z-index: 25;
+      transition: filter 0.36s, opacity 0.32s, transform 0.3s;
+    }
+    .pixel-candle.blowOut {
+      filter: grayscale(100%) brightness(86%);
+      opacity: 0.54;
+      cursor: default;
+      pointer-events: none;
+      animation: candleBlowOut2 0.6s ease;
+    }
+    .pixel-candle.blowOut .candle-flame {
+      display: none;
+    }
+    .candle-flame {
+      position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 34px;
+      background:
+        radial-gradient(ellipse at 60% 40%, #ffe359 32%, #fce28a 56%, transparent 70%);
+      border-radius: 50% 65% 60% 80% / 81% 80% 95% 86%;
+      filter: blur(0.8px) drop-shadow(0 0 10px #ffe359) drop-shadow(0 0 12px #f9b350);
+      opacity: 0.88;
+      animation: flameFlicker2 1.12s infinite alternate;
+      pointer-events: none;
+      z-index: 220;
+    }
+    @keyframes candleBlowOut2 {
+      0% { opacity:1; transform: scale(1);}
+      100% { opacity:0; transform: scale(0.82) translateY(-40px);}
+    }
+    @keyframes flameFlicker2 {
+      0%, 100% { opacity: 0.88; }
+      38% { opacity: 0.42; }
+      50% { filter: blur(1.7px) drop-shadow(0 0 19px #fff485);}
+      75% { filter: blur(0.8px) drop-shadow(0 0 14px #ffe359);}
+    }
+    @keyframes flickerLight {
+      0%, 100% {
+        transform: translate(-50%, 0);
+        filter: drop-shadow(0 0 7px #ffb339);
+      }
+      50% {
+        transform: translate(-50%, -3px);
+        filter: drop-shadow(0 0 14px #ffb339);
+      }
+    }
+    @keyframes cakeDrop {
+      0% { transform: translateY(-380px) scale(0.78);}
+      60% { transform: translateY(20px) scale(1.05);}
+      80% { transform: translateY(-12px) scale(0.97);}
+      100% { transform: translateY(0) scale(1);}
+    }
+    @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+    #main-birthday-app {
+      max-width: 700px;
+      width: 100%;
+      padding: 1rem 2rem 2rem 2rem;
+      background: #fff0f6;
+      border: 5px solid black;
+      box-shadow: 8px 8px 0 #000;
+      border-radius: 12px;
+      color: #d81e6f;
+      font-weight: 700;
+      user-select: text;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease 0.6s;
+      z-index: 10;
+      position: relative;
+    }
+    #main-birthday-app.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    h1.main-title {
+      font-size: 1.8rem;
+      text-align: center;
+      text-shadow:
+        -4px -4px 0 #000,
+        4px -4px 0 #000,
+        -4px 4px 0 #000,
+        4px 4px 0 #000,
+        0 0 0 6px #fff;
+      margin-bottom: 1rem;
+      color: #ff0a78;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    em.main-subtitle {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #b33478;
+      text-shadow: 1px 1px 0 #fff;
+      display: block;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    textarea#message-input {
+      font-family: 'Press Start 2P', cursive;
+      width: 100%;
+      min-height: 96px;
+      padding: 1rem;
+      border: 5px solid black;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+      resize: vertical;
+      background-color: #ffe2f2;
+      color: #9b296d;
+      box-shadow: 8px 8px 0 #000;
+      outline-offset: 2px;
+      image-rendering: pixelated;
+    }
+    #preview-card {
+      padding: 1.5rem;
+      background-color: #fff0f6;
+      border: 5px solid black;
+      box-shadow: 8px 8px 0 #000;
+      font-weight: 700;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: #d81e6f;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+      image-rendering: pixelated;
+      min-height: 160px;
+    }
+    .pixel-button {
+      position: relative;
+      padding: 1rem 2rem;
+      font-family: 'Press Start 2P', cursive;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      background: linear-gradient(90deg, #ff4d9d, #f0a, #ff8bd1);
+      color: white;
+      text-shadow: 2px 2px 0 #000;
+      filter: saturate(1.25);
+      border: none;
+      cursor: pointer;
+      box-shadow:
+        0 0 0 4px #000,
+        6px 6px 0 0 #000,
+        -6px 6px 0 0 #000,
+        6px -6px 0 0 #000,
+        -6px -6px 0 0 #000;
+      image-rendering: pixelated;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+      margin: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pixel-button:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+    .pixel-button:hover {
+      transform: scale(1.05);
+      box-shadow:
+        0 0 6px 2px #ff8bd1,
+        6px 6px 0 0 #000,
+        -6px 6px 0 0 #000,
+        6px -6px 0 0 #000,
+        -6px -6px 0 0 #000;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    #confetti-container {
+      pointer-events: none; position: fixed; top:0; left:0; right:0; bottom:0;
+      overflow: visible; z-index: 9999; user-select:none;
+    }
+    .confetti-piece {
+      position: absolute; width: 12px; height: 12px;
+      background-color: pink; opacity: 0.9; border-radius: 2px;
+      filter: drop-shadow(1px 1px 1px #cc6699);
+      will-change: transform;
+    }
+    .hello-kitty {
+      width: 75px; height: 75px; image-rendering: pixelated;
+      user-select: none; touch-action: none; cursor: default;
+      display: inline-block; animation: danceMove 2.2s ease-in-out infinite;
+    }
+    .hello-kitty.right {
+      animation-delay: 1.1s;
+    }
+    @keyframes danceMove {
+      0%, 100% { transform: scale(1) rotate(0deg) translateY(0); }
+      25% { transform: scale(1.1) rotate(15deg) translateY(-5px); }
+      50% { transform: scale(1) rotate(0deg) translateY(0); }
+      75% { transform: scale(1.1) rotate(-15deg) translateY(-5px); }
+    }
+    @keyframes fadeInDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    @keyframes cakeDrop {
+      0% { transform: translateY(-380px) scale(0.78);}
+      60% { transform: translateY(20px) scale(1.05);}
+      80% { transform: translateY(-12px) scale(0.97);}
+      100% { transform: translateY(0) scale(1);}
+    }
+    @keyframes flameFlicker2 {
+      0%, 100% { opacity: 0.88; }
+      38% { opacity: 0.42; }
+      50% { filter: blur(1.7px) drop-shadow(0 0 19px #fff485);}
+      75% { filter: blur(0.8px) drop-shadow(0 0 14px #ffe359);}
+    }
+    @keyframes flickerLight {
+      0%, 100% {
+        transform: translate(-50%, 0);
+        filter: drop-shadow(0 0 7px #ffb339);
+      }
+      50% {
+        transform: translate(-50%, -3px);
+        filter: drop-shadow(0 0 14px #ffb339);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-container">
+    <!-- Cake intro screen -->
+    <div id="cake-screen" aria-label="Birthday cake animation">
+      <div class="cake-holder">
+        <div class="cake-shadow"></div>
+        <div class="pixel-cake">
+          <div class="cake-rim"></div>
+          <div class="strawberries">
+            <div class="strawberry s1"></div>
+            <div class="strawberry s2"></div>
+            <div class="strawberry s3"></div>
+            <div class="strawberry s4"></div>
+            <div class="strawberry s5"></div>
+            <div class="strawberry s6"></div>
+            <div class="strawberry s7"></div>
+            <div class="strawberry s8"></div>
+          </div>
+          <div class="candles" id="pixel-candles"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main birthday UI -->
+    <div id="main-birthday-app" aria-live="polite" aria-atomic="true" hidden>
+      <h1 class="main-title">
+        <img src="image.png" alt="Hello Kitty Left" class="hello-kitty left" />
+        🎂 HAPPY BIRTHDAY, SAIIII! 🎈
+        <img src="image.png" alt="Hello Kitty Right" class="hello-kitty right" />
+      </h1>
+      <em class="main-subtitle">Have a great year ahead butterball ❤️ ✨</em>
+      <textarea id="message-input" rows="4" aria-label="Birthday wish message">
+Wishing you the sparkliest, happiest birthday!
+      </textarea>
+      <div id="preview-card" aria-live="polite" aria-atomic="true">
+        🎀 Happy Birthday, SAIIII!<br /><br />
+        Wishing you the sparkliest, happiest birthday!<br /><br />
+        — with love
+      </div>
+      <div class="buttons">
+        <button class="pixel-button" id="shuffle-btn" aria-label="Get a new birthday wish">
+          Get Your Wish!
+        </button>
+        <button class="pixel-button" id="confetti-btn" aria-label="Trigger confetti animation">
+          🎉 Confetti!
+        </button>
+        <button class="pixel-button" id="copy-btn" aria-label="Copy wish text to clipboard">
+          📋 Copy Wish Text
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confetti-container"></div>
+
+  <script>
+    function getRandomFlicker() {
+      return (0.88 + Math.random() * 0.44).toFixed(2);
+    }
+    const candles = document.getElementById('pixel-candles');
+    const totalCandles = 5;
+    let candlesBlown = 0;
+
+    for (let i = 0; i < totalCandles; i++) {
+      const candle = document.createElement('div');
+      candle.className = 'pixel-candle';
+      candle.setAttribute('role', 'button');
+      candle.setAttribute('tabindex', '0');
+      candle.setAttribute('aria-label', `Candle ${i + 1}, click to blow out`);
+
+      const flame = document.createElement('div');
+      flame.className = 'candle-flame';
+      flame.style.animationDuration = `${getRandomFlicker()}s`;
+      candle.appendChild(flame);
+
+      candle.addEventListener('click', blowOutCandle);
+      candle.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          blowOutCandle.call(candle);
+        }
+      });
+
+      candles.appendChild(candle);
+    }
+
+    function blowOutCandle() {
+      if (this.classList.contains('blowOut')) return;
+      this.classList.add('blowOut');
+      const flames = this.querySelectorAll('.candle-flame');
+      flames.forEach(f => (f.style.display = 'none'));
+      candlesBlown++;
+      if (candlesBlown === totalCandles) {
+        finishBlowingCandles();
+      }
+    }
+
+    const cakeScreen = document.getElementById('cake-screen');
+    const mainApp = document.getElementById('main-birthday-app');
+    const messageInput = document.getElementById('message-input');
+    const previewCard = document.getElementById('preview-card');
+    const copyBtn = document.getElementById('copy-btn');
+    const confettiBtn = document.getElementById('confetti-btn');
+    const shuffleBtn = document.getElementById('shuffle-btn');
+    const confettiContainer = document.getElementById('confetti-container');
+
+    function finishBlowingCandles() {
+      cakeScreen.classList.add('fade-out');
+      setTimeout(() => {
+        cakeScreen.hidden = true;
+        cakeScreen.remove();
+        mainApp.hidden = false;
+        mainApp.classList.add('visible');
+      }, 1000);
+    }
+
+    const wishes = [
+      "Happy birthday, beautiful Saiiiix! May your day sparkle as much as you do! ✨🎀",
+      "You’re the sweetest cupcake in the bakery! Hope your day is full of sprinkles and giggles 🧁💕",
+      "Shine on, birthday girl! The world is so much brighter with you in it. 🌸💖",
+      "Today’s all about you—laugh lots, smile always, and eat extra cake! 🎂✨",
+      "Wishing you a year as magical and colorful as a rainbow of pastel hearts! 🌈💗",
+      "You light up every room with your dazzling smile. Happy Birthday, sunshine! ☀️💕",
+      "To the prettiest and kindest girl ever—may your dreams be as beautiful as you are! 🌷🦋",
+      "Unwrap happiness, fun, and endless pink-tastic memories! 💝🎉",
+      "Never stop believing in your sparkle. Happy birthday, gorgeous! ✨💓",
+      "Hello Kitty and friends wish you a purrfect birthday—filled with hugs, bows, and cuteness! 🐱🎀"
+    ];
+    const images = [
+        "carousal_photo1.jpg",
+        "carousal_photo2.jpg",
+        "carousal_photo3.jpg",
+        "carousal_photo4.jpg",
+        "carousal_photo5.jpg",
+        "carousal_photo6.jpg"
+    ]
+
+    function updateMessage(newMsg) {
+      messageInput.value = newMsg;
+      
+      previewCard.textContent = newMsg;
+    }
+
+    shuffleBtn.addEventListener('click', () => {
+      let newWish;
+      do {
+        newWish = wishes[Math.floor(Math.random() * wishes.length)];
+      } while (newWish === messageInput.value);
+      shuffleBtn.disabled = true;
+      shuffleBtn.style.transform = 'scale(0.9)';
+      shuffleBtn.style.background = 'linear-gradient(90deg, #ff7aac, #f06ea8, #ff4d9d)';
+      setTimeout(() => {
+        shuffleBtn.style.transform = '';
+        shuffleBtn.style.background = '';
+        shuffleBtn.disabled = false;
+      }, 250);
+      updateMessage(newWish);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(`🎀 Happy Birthday, SAIIII!\n${messageInput.value}\n— with love`);
+        copyBtn.textContent = '✅ Copied!';
+        setTimeout(() => { copyBtn.textContent = '📋 Copy Wish Text'; }, 1500);
+      } catch (e) { alert('Oops, failed to copy!'); }
+    });
+
+    function createConfettiPiece() {
+      const piece = document.createElement('div');
+      piece.classList.add('confetti-piece');
+      piece.style.backgroundColor = pickColor();
+      piece.style.left = Math.random() * window.innerWidth + 'px';
+      piece.style.top = '-20px';
+      piece.style.opacity = Math.random() * 0.9 + 0.1;
+      confettiContainer.appendChild(piece);
+      animateConfetti(piece);
+    }
+
+    function pickColor() {
+      const colors = [
+        '#db2777', '#f472b6', '#ec4899', '#be185d', '#f9a8d4', '#a21caf'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function animateConfetti(piece) {
+      const duration = Math.random() * 3000 + 4000;
+      const xEnd = (Math.random() * 200 - 100) + window.innerWidth / 2;
+      const yEnd = window.innerHeight + 30;
+      const rotateEnd = Math.random() * 720 + 360;
+
+      let start = null;
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const progressNorm = Math.min(progress / duration, 1);
+        piece.style.top = (-20 + progressNorm * (yEnd + 20)) + 'px';
+        piece.style.left = (parseFloat(piece.style.left) + progressNorm * (xEnd - parseFloat(piece.style.left))) + 'px';
+        piece.style.transform = `rotate(${progressNorm * rotateEnd}deg)`;
+        piece.style.opacity = 1 - progressNorm;
+        if (progress < duration) {
+          requestAnimationFrame(step);
+        } else {
+          piece.remove();
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function burstConfetti(amount = 30) {
+      for (let i = 0; i < amount; i++) {
+        setTimeout(createConfettiPiece, i * 80);
+      }
+    }
+
+    confettiBtn.addEventListener('click', () => {
+      burstConfetti(40);
+    });
+  </script>
+</body>
 </html>
